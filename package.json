@@ -1,0 +1,9 @@
+{
+  "name": "amazon-profit-calculator",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0"
+  }
+}
