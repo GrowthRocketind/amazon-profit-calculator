@@ -192,7 +192,7 @@
         <legend>Product</legend>
         <div class="row">
           <div class="field">
-            <label for="price">Selling price<span class="hint">What the customer pays, incl. GST</span></label>
+            <label for="price">Selling price<span class="hint">Actual customer-paid price after discounts, incl. GST</span></label>
             <div class="input"><span>₹</span><input id="price" type="number" inputmode="decimal" min="0" step="1" value="999"></div>
           </div>
           <div class="field">
@@ -224,6 +224,10 @@
           <div class="field">
             <label for="ship">Fulfilment / shipping<span class="hint">FBA, Easy Ship or self-ship fee</span></label>
             <div class="input"><span>₹</span><input id="ship" type="number" inputmode="decimal" min="0" step="1" placeholder="Your fee" value="" required></div>
+          </div>
+          <div class="field">
+            <label for="other">Other Amazon fees per completed order<span class="hint">E.g., storage allocation or optional programme fees</span></label>
+            <div class="input"><span>₹</span><input id="other" type="number" inputmode="decimal" min="0" step="1" value="0"></div>
           </div>
         </div>
       </fieldset>
@@ -271,7 +275,7 @@
       <div class="stats">
         <div class="stat"><div class="k">Monthly contribution</div><div class="v" id="mcm">₹0</div></div>
         <div class="stat"><div class="k">Estimated monthly result after entered fixed costs</div><div class="v" id="net">₹0</div></div>
-        <div class="stat"><div class="k">Break-even TACoS</div><div class="v" id="beTacos">0%</div></div>
+        <div class="stat"><div class="k">Break-even ad spend % of gross order value</div><div class="v" id="beTacos">0%</div></div>
         <div class="stat"><div class="k">Orders for ₹1L net / month</div><div class="v" id="need">–</div></div>
       </div>
 
@@ -292,7 +296,7 @@
       <h2>How this is calculated</h2>
       <ul>
         <li>Revenue is counted <strong>excluding GST</strong>: <code>price ÷ (1 + GST%)</code>. GST isn't your money.</li>
-        <li>Referral fee is charged on the full selling price. Fees are shown excluding the 18% GST on fees, since registered sellers can claim that back as input credit.</li>
+        <li>Referral fee uses the actual customer-paid price. Amazon fees are entered excluding fee GST, assuming you can claim eligible input credit; otherwise include unrecoverable tax in other costs.</li>
         <li>Returned orders are assumed fully refunded and resellable. Enter the complete <strong>extra net loss per return</strong>, including unrecovered shipping, fees, handling and damage. Check this against actual settlements.</li>
         <li>Ad spend per placed order is <code>ad spend % × GST-inclusive selling price</code>. Match this to ad spend divided by gross placed-order value, not post-return net sales.</li>
         <li>Contribution is an estimate <strong>per order placed</strong>, averaged over expected returns, before fixed costs. The monthly result is contribution × orders minus the fixed costs you enter. It excludes any other costs you omit.</li>
@@ -332,7 +336,7 @@
 
 <script>
 (function () {
-  var FIELDS = ['price', 'gst', 'cogs', 'pack', 'ref', 'closing', 'ship', 'ret', 'retloss', 'tacos', 'orders', 'fixed'];
+  var FIELDS = ['price', 'gst', 'cogs', 'pack', 'ref', 'closing', 'ship', 'other', 'ret', 'retloss', 'tacos', 'orders', 'fixed'];
   var DEFAULTS = {};
   var STORE_KEY = 'ga-amazon-calc-v1';
   var $ = function (id) { return document.getElementById(id); };
@@ -360,7 +364,7 @@
     var parts = {
       gst: keep * (P - rev),
       cogs: keep * C,
-      fees: keep * (ref * P + closing),
+      fees: keep * (ref * P + closing + num('other')),
       ship: keep * (ship + pack),
       returns: r * L,
       ads: T * P
@@ -380,7 +384,7 @@
   var SEGMENTS = [
     ['gst', 'GST', 'var(--seg-gst)'],
     ['cogs', 'Product cost', 'var(--seg-cogs)'],
-    ['fees', 'Referral + closing fees', 'var(--seg-fees)'],
+    ['fees', 'Amazon fees incl. other', 'var(--seg-fees)'],
     ['ship', 'Shipping + packaging', 'var(--seg-ship)'],
     ['returns', 'Returns', 'var(--seg-returns)'],
     ['ads', 'Ads', 'var(--seg-ads)']
