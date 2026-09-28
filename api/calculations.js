@@ -27,7 +27,7 @@ function estimate(raw) {
   return { input: { sku, ...n }, result: {
     contributionPerPlacedOrder: Number(contribution.toFixed(2)),
     monthlyContribution: Number((contribution * n.orders).toFixed(2)),
-    breakEvenAdPercent: Number(((contribution + n.tacos / 100 * n.price) / n.price * 100).toFixed(2))
+    breakEvenAdPercent: Number(Math.max(0, (contribution + n.tacos / 100 * n.price) / n.price * 100).toFixed(2))
   }};
 }
 
