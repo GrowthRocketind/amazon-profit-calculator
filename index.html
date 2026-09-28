@@ -463,8 +463,8 @@
   $('saveCalc').addEventListener('click', async function () {
     var status = $('saveStatus'), button = $('saveCalc');
     var sellerName = $('sellerName').value.trim(), email = $('sellerEmail').value.trim().toLowerCase();
-    if (['ref', 'closing', 'ship'].some(function (id) { return $(id).value.trim() === ''; })) {
-      status.textContent = 'Enter this SKU’s actual Amazon fees first.'; return;
+    if (FIELDS.some(function (id) { return $(id).value.trim() === ''; })) {
+      status.textContent = 'Complete the product, fee and order fields first.'; return;
     }
     if (sellerName.length < 2 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || !$('saveConsent').checked) {
       status.textContent = 'Enter your seller name and valid email, then tick the save consent box.'; return;
