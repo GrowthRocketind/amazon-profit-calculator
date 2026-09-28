@@ -33,6 +33,18 @@
 <p class="sub">Sorted by monthly contribution, lowest first, so products consuming cash are easy to spot. A positive per-order result still may not cover fixed costs.</p>
 <button class="button" id="download" type="button" disabled>Download results CSV</button>
 </section>
+<section class="card" aria-labelledby="save-title">
+<h2 id="save-title">Save this comparison</h2>
+<p>Use your Amazon seller name and email to save the inputs and estimated results. Ish Batra may contact you about your calculation. Marketing updates are optional.</p>
+<div class="actions" style="margin-bottom:12px">
+<label>Amazon seller name<br><input class="smallinput" style="width:220px" id="sellerName" type="text" maxlength="100" autocomplete="organization"></label>
+<label>Work email<br><input class="smallinput" style="width:250px" id="sellerEmail" type="email" maxlength="254" autocomplete="email"></label>
+</div>
+<label style="display:block"><input id="saveConsent" type="checkbox"> I agree to save my seller name, email, inputs and results so Ish Batra can follow up about this calculation.</label>
+<label style="display:block;margin:8px 0 15px"><input id="marketingConsent" type="checkbox"> Send occasional marketing insights (optional).</label>
+<button class="button primary" id="save" type="button">Calculate &amp; save</button>
+<p id="saveStatus" class="sub" role="status"></p>
+</section>
 <section class="card">
 <h2>How to read this</h2>
 <p>Returns are assumed fully refunded, with resaleable products. “Loss per return” should include unrecovered shipping, fees, handling and damage. Ads % here means ad spend divided by <strong>gross placed-order value</strong>, not ad-attributed ROAS. Enter other selling fees per completed order, such as an allocation of storage and optional programme costs. The monthly result is an estimate, not a Seller Central settlement or a complete financial statement. Taxes on Amazon fees assume eligible input credit. Validate your own tax position and reconcile with actual settlements.</p>
@@ -57,6 +69,7 @@ function calculate(){let valid=data.map(calc).filter(Boolean).sort((a,b)=>a.mont
 document.getElementById('add').onclick=()=>{data.push(Object.fromEntries(columns.map(k=>[k,''])));draw();rows.lastElementChild?.querySelector('input')?.focus()};
 document.getElementById('template').onclick=()=>download('amazon-sku-template.csv',[columns]);
 document.getElementById('download').onclick=()=>download('amazon-sku-results.csv',[['sku','contribution_per_placed_order_inr','margin_on_net_sales_percent','break_even_ad_percent','monthly_contribution_inr'],...window.calculated.map(r=>[r.sku,r.cm.toFixed(2),r.margin===null?'':r.margin.toFixed(2),r.be.toFixed(2),r.monthly.toFixed(2)])]);
+document.getElementById('save').onclick=async()=>{const sellerName=document.getElementById('sellerName').value.trim(),email=document.getElementById('sellerEmail').value.trim().toLowerCase(),status=document.getElementById('saveStatus'),button=document.getElementById('save');const valid=data.map(calc).filter(Boolean);if(!data.length||valid.length!==data.length){status.textContent='Complete every field for every SKU first.';return}if(sellerName.length<2||!/^\\S+@\\S+\\.\\S+$/.test(email)||!document.getElementById('saveConsent').checked){status.textContent='Enter seller name and valid email, then tick the save consent box.';return}button.disabled=true;status.textContent='Saving your comparison…';try{const response=await fetch('/api/calculations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sellerName,email,mode:'bulk',items:data,fixedCost:document.getElementById('fixed').value,consent:true,marketingConsent:document.getElementById('marketingConsent').checked})});const result=await response.json();if(!response.ok)throw Error(result.error||'Save failed');status.textContent='Saved '+valid.length+' SKUs. Estimated monthly contribution: '+money(valid.reduce((sum,x)=>sum+x.monthly,0))+'.'}catch(err){status.textContent='The comparison still works, but the server did not save it: '+err.message+'. Please try later.'}finally{button.disabled=false}};
 document.getElementById('fixed').oninput=calculate;
 document.getElementById('file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>2000000)throw Error('CSV is too large (max 2 MB)');const lines=parseCSV((await file.text()).replace(/^\uFEFF/,''));if(!lines.length||lines[0].join(',')!==columns.join(','))throw Error('Use the blank template headers exactly as supplied');if(lines.length>1001)throw Error('Maximum 1,000 SKUs per file');data=lines.slice(1).map(row=>Object.fromEntries(columns.map((k,i)=>[k,row[i]??''])));draw();status.textContent='Imported '+data.length+' rows. '+status.textContent}catch(err){status.textContent='Import failed: '+err.message}e.target.value=''};
 calculate();
