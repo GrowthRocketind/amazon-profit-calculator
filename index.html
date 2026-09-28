@@ -182,9 +182,10 @@
   <header>
     <div class="pill">Free tool for Amazon India sellers</div>
     <h1>Amazon India <span class="hl">Profit</span> Calculator</h1>
-    <p>Revenue isn't profit. Put in your numbers and see what you actually keep per order after GST, Amazon fees, shipping, returns and ads.</p>
+    <p>Check one SKU with its own price, actual Amazon fees, product cost, returns and ads. For a whole catalogue, use the <a href="bulk.html" style="color:var(--accent)">multi-SKU calculator</a>.</p>
   </header>
 
+  <p style="color:var(--muted);font-size:13px;margin-top:14px">Enter referral, closing and shipping fees for this SKU to calculate. <a href="https://sell.amazon.in/fees-and-pricing/" target="_blank" rel="noopener" style="color:var(--accent)">Check Amazon's current fees</a>.</p>
   <div class="grid">
     <form class="card" id="form" autocomplete="off" onsubmit="return false">
       <fieldset>
@@ -213,16 +214,16 @@
         <legend>Amazon fees</legend>
         <div class="row">
           <div class="field">
-            <label for="ref">Referral fee<span class="hint">Depends on category, check Seller Central</span></label>
-            <div class="input"><input id="ref" type="number" inputmode="decimal" min="0" max="50" step="0.5" value="12"><span>%</span></div>
+            <label for="ref">Referral fee<span class="hint">Enter your SKU's current rate from Seller Central. Can be 0%.</span></label>
+            <div class="input"><input id="ref" type="number" inputmode="decimal" min="0" max="50" step="0.5" placeholder="Your rate" value="" required><span>%</span></div>
           </div>
           <div class="field">
             <label for="closing">Closing fee<span class="hint">Fixed fee per order, by price band</span></label>
-            <div class="input"><span>₹</span><input id="closing" type="number" inputmode="decimal" min="0" step="1" value="25"></div>
+            <div class="input"><span>₹</span><input id="closing" type="number" inputmode="decimal" min="0" step="1" placeholder="Your fee" value="" required></div>
           </div>
           <div class="field">
             <label for="ship">Fulfilment / shipping<span class="hint">FBA, Easy Ship or self-ship fee</span></label>
-            <div class="input"><span>₹</span><input id="ship" type="number" inputmode="decimal" min="0" step="1" value="70"></div>
+            <div class="input"><span>₹</span><input id="ship" type="number" inputmode="decimal" min="0" step="1" placeholder="Your fee" value="" required></div>
           </div>
         </div>
       </fieldset>
@@ -245,7 +246,7 @@
         <legend>Ads &amp; scale</legend>
         <div class="row">
           <div class="field">
-            <label for="tacos">TACoS<span class="hint">Total ad spend ÷ total sales</span></label>
+            <label for="tacos">Ad spend %<span class="hint">Ad spend ÷ gross placed-order value. Use the same basis for all SKUs.</span></label>
             <div class="input"><input id="tacos" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="15"><span>%</span></div>
           </div>
           <div class="field">
@@ -269,7 +270,7 @@
 
       <div class="stats">
         <div class="stat"><div class="k">Monthly contribution</div><div class="v" id="mcm">₹0</div></div>
-        <div class="stat"><div class="k">Monthly net profit</div><div class="v" id="net">₹0</div></div>
+        <div class="stat"><div class="k">Estimated monthly result after entered fixed costs</div><div class="v" id="net">₹0</div></div>
         <div class="stat"><div class="k">Break-even TACoS</div><div class="v" id="beTacos">0%</div></div>
         <div class="stat"><div class="k">Orders for ₹1L net / month</div><div class="v" id="need">–</div></div>
       </div>
@@ -292,20 +293,19 @@
       <ul>
         <li>Revenue is counted <strong>excluding GST</strong>: <code>price ÷ (1 + GST%)</code>. GST isn't your money.</li>
         <li>Referral fee is charged on the full selling price. Fees are shown excluding the 18% GST on fees, since registered sellers can claim that back as input credit.</li>
-        <li>Returned orders are refunded. They cost you the "loss per return" instead of fees, and the product is assumed to be resellable.</li>
-        <li>Ad cost per order is <code>TACoS × selling price</code>.</li>
-        <li><strong>Contribution margin</strong> is what's left per order before fixed costs. Net profit is contribution × orders minus fixed costs.</li>
+        <li>Returned orders are assumed fully refunded and resellable. Enter the complete <strong>extra net loss per return</strong>, including unrecovered shipping, fees, handling and damage. Check this against actual settlements.</li>
+        <li>Ad spend per placed order is <code>ad spend % × GST-inclusive selling price</code>. Match this to ad spend divided by gross placed-order value, not post-return net sales.</li>
+        <li>Contribution is an estimate <strong>per order placed</strong>, averaged over expected returns, before fixed costs. The monthly result is contribution × orders minus the fixed costs you enter. It excludes any other costs you omit.</li>
       </ul>
     </div>
     <div class="card">
       <h2>Reading your result</h2>
       <ul>
-        <li><strong>Above 25%:</strong> healthy. You have room to push ads and scale.</li>
-        <li><strong>10–25%:</strong> thin. One bad month of returns or a CPC spike can wipe it out.</li>
-        <li><strong>Below 10%:</strong> scaling will likely lose money. Fix price, product cost or ads first.</li>
-        <li><strong>Break-even TACoS</strong> is the most you can spend on ads before every order loses money.</li>
+        <li><strong>Positive contribution:</strong> the SKU covers the variable costs entered; check the monthly result before scaling.</li>
+        <li><strong>Negative contribution:</strong> every additional order at these assumptions increases the loss.</li>
+        <li><strong>Break-even ad spend %</strong> is the estimated ceiling before per-order contribution reaches zero. It does not cover fixed costs.</li>
       </ul>
-      <p>Fee rates change often. Check the current referral, closing and shipping fees for your category on Seller Central before you make decisions.</p>
+      <p>Fees vary by category, price and fulfilment method. Check the current values in Seller Central. <a href="https://sell.amazon.in/fees-and-pricing/" target="_blank" rel="noopener">Amazon fee guide</a>.</p>
     </div>
   </div>
 
@@ -314,7 +314,7 @@
     <a href="#results">See breakdown ↓</a>
   </div>
 
-  <footer>Built by Ish Batra, fractional CMO for D2C brands. Estimates only, not financial or tax advice.</footer>
+  <footer>Built by Ish Batra, fractional CMO for D2C brands. Estimates depend on your inputs and return assumptions; reconcile with Seller Central settlements. Not financial or tax advice.</footer>
 </div>
 <footer class="site-footer">
   <div class="in">
@@ -387,6 +387,17 @@
   ];
 
   function render() {
+    if (['ref', 'closing', 'ship'].some(function (id) { return $(id).value.trim() === ''; })) {
+      $('cm').textContent = 'Enter fees';
+      $('cmPct').textContent = 'Use this SKU’s actual Amazon fees above';
+      $('mbarCm').textContent = 'Enter fees';
+      ['mcm', 'net', 'beTacos', 'need'].forEach(function (id) { $(id).textContent = '—'; });
+      $('verdict').className = 'verdict v-warn';
+      $('verdictText').textContent = 'Enter referral, closing and shipping fees for this SKU.';
+      $('bar').innerHTML = '';
+      $('breakdown').innerHTML = '';
+      return;
+    }
     var d = calc();
 
     $('cm').textContent = rupees(d.cm);
@@ -403,10 +414,8 @@
     $('need').className = 'v ' + (d.need === null ? 'neg' : '');
 
     var v = $('verdict'), vt = $('verdictText');
-    if (d.cm < 0) { v.className = 'verdict v-bad'; vt.textContent = 'Every order loses money. More ads will make it worse.'; }
-    else if (d.cmPct < 10) { v.className = 'verdict v-bad'; vt.textContent = 'Very thin. Scaling will likely lose money.'; }
-    else if (d.cmPct < 25) { v.className = 'verdict v-warn'; vt.textContent = 'Thin margin. One bad month can wipe it out.'; }
-    else { v.className = 'verdict v-good'; vt.textContent = 'Healthy margin. You have room to scale.'; }
+    if (d.cm < 0) { v.className = 'verdict v-bad'; vt.textContent = 'Negative contribution at these inputs. Check price, fees, returns and ads before scaling.'; }
+    else { v.className = 'verdict v-good'; vt.textContent = 'Positive contribution at these inputs. Compare the monthly result and test sensitivity before scaling.'; }
 
     var costs = SEGMENTS.reduce(function (s, x) { return s + d.parts[x[0]]; }, 0);
     var base = Math.max(d.collected, costs, 1);
