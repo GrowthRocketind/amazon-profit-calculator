@@ -291,6 +291,19 @@
     </section>
   </div>
 
+  <section class="card" style="margin-top:22px" aria-labelledby="save-title">
+    <h2 id="save-title">Save this calculation</h2>
+    <p style="color:var(--muted);font-size:14px">Enter your Amazon seller name and email to save a copy of the inputs and estimated result. We will use these details to identify your calculation and may contact you about it. Marketing updates are optional.</p>
+    <div class="row">
+      <div class="field"><label for="sellerName">Amazon seller name</label><div class="input"><input id="sellerName" type="text" maxlength="100" autocomplete="organization" placeholder="Your seller or business name"></div></div>
+      <div class="field"><label for="sellerEmail">Work email</label><div class="input"><input id="sellerEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@brand.com"></div></div>
+    </div>
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-bottom:9px"><input id="saveConsent" type="checkbox" style="margin-top:4px"> I agree to save my seller name, email, calculator inputs and result so Ish Batra can follow up about this calculation.</label>
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-bottom:15px"><input id="marketingConsent" type="checkbox" style="margin-top:4px"> Send me occasional marketing insights (optional).</label>
+    <button class="btn" id="saveCalc" type="button" style="border:0;cursor:pointer">Calculate &amp; save</button>
+    <p id="saveStatus" role="status" style="font-size:13px;margin:10px 0 0;color:var(--muted)"></p>
+  </section>
+
   <div class="explain">
     <div class="card">
       <h2>How this is calculated</h2>
@@ -447,6 +460,32 @@
   function track(name, params) {
     try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch (e) {}
   }
+  $('saveCalc').addEventListener('click', async function () {
+    var status = $('saveStatus'), button = $('saveCalc');
+    var sellerName = $('sellerName').value.trim(), email = $('sellerEmail').value.trim().toLowerCase();
+    if (FIELDS.some(function (id) { return $(id).value.trim() === ''; })) {
+      status.textContent = 'Complete the product, fee and order fields first.'; return;
+    }
+    if (sellerName.length < 2 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || !$('saveConsent').checked) {
+      status.textContent = 'Enter your seller name and valid email, then tick the save consent box.'; return;
+    }
+    var data = {}; FIELDS.forEach(function (f) { data[f] = $(f).value; });
+    data.sku = 'Single SKU';
+    button.disabled = true; status.textContent = 'Saving your calculation…';
+    try {
+      var response = await fetch('/api/calculations', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sellerName: sellerName, email: email, mode: 'single', items: [data], fixedCost: data.fixed,
+          consent: $('saveConsent').checked, marketingConsent: $('marketingConsent').checked })
+      });
+      var result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Save failed');
+      status.textContent = 'Saved. Your estimated contribution per placed order is ' + rupees(calc().cm) + '.';
+      track('calculator_saved', { tool: 'amazon_profit_calculator' });
+    } catch (error) {
+      status.textContent = 'The estimate still works, but the server did not save it: ' + error.message + '. Please try later.';
+    } finally { button.disabled = false; }
+  });
   var used = false;
   $('form').addEventListener('input', function () {
     render();
